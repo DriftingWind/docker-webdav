@@ -1,3 +1,36 @@
+## 修改说明
+0. 感谢Bytemark维护的这个项目，大大简化了WebDAV服务器的搭设，用了很多年。
+1. 原项目以`httpd:alpine`为底包构建，具体版本为Alpine 3.8.1 + Apache 2.4.37。后续版本Alpine移除了`apr-util-dbm_db`致使WebDAV出错，找不到解决方案，故以`httpd:latest`为底包重新构建，当前具体版本为Debian 12 + Apache 2.4.62。
+2. 在`dav.conf`中声明UTF-8，解决文件名乱码。
+3. 使用GitHub Actions编译并推送到GitHub Container Registry。
+4. 用容器中包含的`htpasswd`工具为指定用户名生成密码hash并输出到终端：
+   ```bash
+   sudo docker run -it --rm ghcr.io/driftingwind/webdav /bin/bash -c "htpasswd -B -c tempfile myusername && cat tempfile"
+   ```
+   把输出的文本保存到自己的`user.passwd`文件中。
+5. 参考`docker-compose.yml`
+    ```yaml
+    services:
+      app:
+        image: ghcr.io/driftingwind/webdav
+        container_name: webdav
+        ports:
+          - "80:80"
+          - "443:443"
+        restart: unless-stopped
+        environment:
+          AUTH_TYPE: Basic
+          SSL_CERT: selfsigned
+          SERVER_NAMES: webdav.mysite.local
+        volumes:
+          - /path/to/cert.pem:/cert.pem:ro
+          - /path/to/privkey.pem:/privkey.pem:ro
+          - /path/to/webdavdir:/var/lib/dav
+          - /path/to/user.passwd:/user.passwd
+    ```
+
+## 以下是README.md原文
+   
 ## Supported tags
 
 * [`2.4`, `latest` (*2.4/Dockerfile*)](https://github.com/BytemarkHosting/docker-webdav/blob/master/2.4/Dockerfile)

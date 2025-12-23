@@ -1,10 +1,10 @@
 name: Docker Image CI
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  #push:
+  #  branches: [ "master" ]
+  #pull_request:
+  #  branches: [ "master" ]
   workflow_dispatch:
 
 jobs:
@@ -27,4 +27,6 @@ jobs:
         with:
           context: "{{defaultContext}}:2.4"
           push: true
-          tags: ghcr.io/driftingwind/webdav:latest
+          tags: |
+            ghcr.io/driftingwind/webdav:alpine
+            ghcr.io/driftingwind/webdav:latest

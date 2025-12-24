@@ -1,16 +1,29 @@
 name: Docker Image CI
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  #push:
+  #  branches: [ "master" ]
+  #pull_request:
+  #  branches: [ "master" ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
+    strategy:
+      fail-fast: false # 其中一个失败不影响另一个继续构建
+      matrix:
+        include:
+          - os_type: alpine
+            dockerfile: Dockerfile
+            # 对应 alpine 版本的两个标签
+            full_tags: ghcr.io/driftingwind/webdav:latest,ghcr.io/driftingwind/webdav:alpine
+          - os_type: debian
+            dockerfile: Dockerfile-debian
+            # 对应 debian 版本的标签
+            full_tags: ghcr.io/driftingwind/webdav:debian
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,9 +35,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: "{{defaultContext}}:2.4"
+          file: ${{ matrix.dockerfile }}
           push: true
-          tags: ghcr.io/driftingwind/webdav:latest
+          tags: ${{ matrix.full_tags }}

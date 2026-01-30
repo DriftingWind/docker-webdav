@@ -16,13 +16,13 @@ jobs:
       matrix:
         include:
           - os_type: alpine
+            base_image: httpd:alpine
             dockerfile: Dockerfile
-            # 对应 alpine 版本的两个标签
-            full_tags: ghcr.io/driftingwind/webdav:latest,ghcr.io/driftingwind/webdav:alpine
+            repo: ghcr.io/driftingwind/webdav
           - os_type: debian
+            base_image: httpd:latest
             dockerfile: Dockerfile-debian
-            # 对应 debian 版本的标签
-            full_tags: ghcr.io/driftingwind/webdav:debian
+            repo: ghcr.io/driftingwind/webdav
 
     steps:
       - name: Checkout repository
@@ -35,6 +35,28 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # 动态提取版本号步骤
+      - name: Extract upstream versions
+        id: vars
+        run: |
+          # 拉取当前 matrix 指定的底包
+          docker pull ${{ matrix.base_image }}
+          
+          # 1. 提取 Apache 版本 (通用)
+          HTTPD_VER=$(docker run --rm ${{ matrix.base_image }} httpd -v | head -n1 | sed 's/.*Apache\/\([0-9.]*\).*/\1/')
+          
+          # 2. 提取 OS 版本 (根据 os_type 判断)
+          if [ "${{ matrix.os_type }}" = "alpine" ]; then
+            OS_VER="alpine$(docker run --rm ${{ matrix.base_image }} cat /etc/alpine-release | tr -d '\r')"
+          else
+            OS_VER="debian$(docker run --rm ${{ matrix.base_image }} cat /etc/debian_version | tr -d '\r')"
+          fi
+          
+          # 3. 组合 Tag
+          DYNAMIC_TAG="${HTTPD_VER}-${OS_VER}"
+          
+          echo "dynamic_tag=$DYNAMIC_TAG" >> $GITHUB_OUTPUT
+          echo "Detected: $DYNAMIC_TAG"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -42,4 +64,7 @@ jobs:
           context: "{{defaultContext}}:2.4"
           file: ${{ matrix.dockerfile }}
           push: true
-          tags: ${{ matrix.full_tags }}
+          tags: |
+            ${{ matrix.repo }}:${{ matrix.os_type }}
+            ${{ matrix.repo }}:${{ steps.vars.outputs.dynamic_tag }}
+            ${{ matrix.os_type == 'alpine' && format('{0}:latest', matrix.repo) || '' }}

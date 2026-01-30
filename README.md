@@ -1,6 +1,6 @@
 ## 修改说明
 0. 感谢Bytemark维护的这个项目，大大简化了WebDAV服务器的搭设，用了很多年。
-1. 原项目以`httpd:alpine`为底包构建，具体版本为Alpine 3.8.1 + Apache 2.4.37。后续版本Alpine移除了`apr-util-dbm_db`致使WebDAV出错。在AI辅助下修改代码，Alpine版本安装`apr-util-dbm_gdbm`为替代，同时增加基于`httpd:latest`的Debian版本。当前具体版本为Alpine 3.23.2 / Debian 13.2 + Apache 2.4.66。
+1. 原项目以`httpd:alpine`为底包构建，具体版本为Alpine 3.8.1 + Apache 2.4.37。后续版本Alpine移除了`apr-util-dbm_db`致使WebDAV出错。在AI辅助下修改代码，Alpine版本安装`apr-util-dbm_gdbm`为替代，同时增加基于`httpd:latest`的Debian版本。具体版本号已加入对应tags，可[点此查看](https://github.com/users/DriftingWind/packages/container/package/webdav)。
 2. 在`dav.conf`中声明UTF-8，解决文件名乱码。
 3. 使用GitHub Actions编译并推送到GitHub Container Registry
 

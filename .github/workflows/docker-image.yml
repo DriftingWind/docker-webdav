@@ -20,13 +20,13 @@ jobs:
             dockerfile: Dockerfile
             repo: |
               ghcr.io/driftingwind/webdav
-              ${{ secrets.DOCKERHUB_USERNAME }}/webdav
+              driftingwind/webdav
           - os_type: debian
             base_image: httpd:latest
-            dockerfile: |
+            dockerfile: Dockerfile-debian
+            repo: |
               ghcr.io/driftingwind/webdav
-              ${{ secrets.DOCKERHUB_USERNAME }}/webdav
-            repo: ghcr.io/driftingwind/webdav
+              driftingwind/webdav
 
     steps:
       - name: Checkout repository

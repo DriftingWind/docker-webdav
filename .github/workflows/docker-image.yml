@@ -18,15 +18,11 @@ jobs:
           - os_type: alpine
             base_image: httpd:alpine
             dockerfile: Dockerfile
-            repo: |
-              ghcr.io/driftingwind/webdav
-              driftingwind/webdav
+            repo: [ghcr.io/driftingwind/webdav,driftingwind/webdav]
           - os_type: debian
             base_image: httpd:latest
             dockerfile: Dockerfile-debian
-            repo: |
-              ghcr.io/driftingwind/webdav
-              driftingwind/webdav
+            repo: [ghcr.io/driftingwind/webdav,driftingwind/webdav]
 
     steps:
       - name: Checkout repository

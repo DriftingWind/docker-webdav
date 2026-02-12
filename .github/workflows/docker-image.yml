@@ -18,10 +18,14 @@ jobs:
           - os_type: alpine
             base_image: httpd:alpine
             dockerfile: Dockerfile
-            repo: ghcr.io/driftingwind/webdav
+            repo: |
+              ghcr.io/driftingwind/webdav
+              ${{ secrets.DOCKERHUB_USERNAME }}/webdav
           - os_type: debian
             base_image: httpd:latest
-            dockerfile: Dockerfile-debian
+            dockerfile: |
+              ghcr.io/driftingwind/webdav
+              ${{ secrets.DOCKERHUB_USERNAME }}/webdav
             repo: ghcr.io/driftingwind/webdav
 
     steps:
@@ -34,6 +38,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       # 动态提取版本号步骤
       - name: Extract upstream versions
@@ -63,8 +76,10 @@ jobs:
         with:
           context: "{{defaultContext}}:2.4"
           file: ${{ matrix.dockerfile }}
-          push: true
+          push: false
           tags: |
             ${{ matrix.repo }}:${{ matrix.os_type }}
             ${{ matrix.repo }}:${{ steps.vars.outputs.dynamic_tag }}
             ${{ matrix.os_type == 'alpine' && format('{0}:latest', matrix.repo) || '' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

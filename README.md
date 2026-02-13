@@ -1,10 +1,10 @@
 ## 修改说明
-0. 感谢Bytemark维护的这个项目，大大简化了WebDAV服务器的搭设，用了很多年。
-1. 原项目以`httpd:alpine`为底包构建，具体版本为Alpine 3.8.1 + Apache 2.4.37。后续版本Alpine移除了`apr-util-dbm_db`致使WebDAV出错。在AI辅助下修改代码，Alpine版本安装`apr-util-dbm_gdbm`为替代，同时增加基于`httpd:latest`的Debian版本。具体版本号已加入对应tags，可[点此查看](https://github.com/users/DriftingWind/packages/container/package/webdav)。
-2. 在`dav.conf`中声明UTF-8，解决文件名乱码。
-3. 使用GitHub Actions编译并推送到GitHub Container Registry
+0. 感谢 Bytemark 维护的这个项目，大大简化了 WebDAV 服务器的搭设，用了很多年。
+1. 原项目以`httpd:alpine`为底包构建，具体版本为 Alpine 3.8.1 + Apache 2.4.37。后续版本 Alpine 移除了`apr-util-dbm_db`致使 WebDAV 出错。在 AI 辅助下修改代码，Alpine 版本安装`apr-util-dbm_gdbm`为替代，同时增加基于`httpd:latest`的 Debian 版本。具体版本号已加入对应 tags，可[点此查看](https://github.com/users/DriftingWind/packages/container/package/webdav)。
+2. 在`dav.conf`中声明 UTF-8，解决文件名乱码。
+3. 使用 GitHub Actions 编译并同步推送到 GHCR 和 Docker Hub。
 
-   Alpine版：
+   Alpine 版：
    ```bash
    sudo docker pull ghcr.io/driftingwind/webdav:latest
    ```
@@ -12,11 +12,11 @@
    ```
    sudo docker pull ghcr.io/driftingwind/webdav:alpine
    ```
-   Debian版：
+   Debian 版：
    ```bash
    sudo docker pull ghcr.io/driftingwind/webdav:debian
    ```
-4. 用容器中包含的`htpasswd`工具为指定用户名生成密码hash并输出到终端（Debian版把`/bin/sh`改为`/bin/bash`）：
+4. 用容器中包含的`htpasswd`工具为指定用户名生成密码 hash 并输出到终端（Debian 版把`/bin/sh`改为`/bin/bash`）：
    ```sh
    sudo docker run -it --rm ghcr.io/driftingwind/webdav /bin/sh -c "htpasswd -B -c tempfile myusername && cat tempfile"
    ```

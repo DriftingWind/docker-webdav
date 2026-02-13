@@ -18,11 +18,9 @@ jobs:
           - os_type: alpine
             base_image: httpd:alpine
             dockerfile: Dockerfile
-            repo: [ghcr.io/driftingwind/webdav,driftingwind/webdav]
           - os_type: debian
             base_image: httpd:latest
             dockerfile: Dockerfile-debian
-            repo: [ghcr.io/driftingwind/webdav,driftingwind/webdav]
 
     steps:
       - name: Checkout repository
@@ -67,15 +65,24 @@ jobs:
           echo "dynamic_tag=$DYNAMIC_TAG" >> $GITHUB_OUTPUT
           echo "Detected: $DYNAMIC_TAG"
 
+      - name: Extract metadate
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/driftingwind/webdav
+            ${{ secrets.DOCKERHUB_USERNAME }}/webdav
+          tags: |
+            type=raw,value=${{ matrix.os_type }}
+            type=raw,value=${{ steps.vars.outputs.dynamic_tag }}
+            type=raw,value=latest,enable=${{ matrix.os_type == 'alpine' }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: "{{defaultContext}}:2.4"
           file: ${{ matrix.dockerfile }}
-          push: false
-          tags: |
-            ${{ matrix.repo }}:${{ matrix.os_type }}
-            ${{ matrix.repo }}:${{ steps.vars.outputs.dynamic_tag }}
-            ${{ matrix.os_type == 'alpine' && format('{0}:latest', matrix.repo) || '' }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
